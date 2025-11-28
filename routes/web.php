@@ -4,14 +4,18 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| CONTROLLERS
+| CONTROLLERS (CLIENT)
 |--------------------------------------------------------------------------
 */
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\OrderTrackController;
 use App\Http\Controllers\InvoiceController;
 
-// Admin Controllers
+/*
+|--------------------------------------------------------------------------
+| CONTROLLERS (ADMIN)
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ServicesController;
@@ -27,7 +31,6 @@ use App\Http\Controllers\Admin\SettingController;
 */
 Route::redirect('/admin', '/admin/dashboard');
 
-
 /*
 |--------------------------------------------------------------------------
 | LANDING PAGE
@@ -42,7 +45,6 @@ Route::get('/contact', function () {
     return redirect()->away('https://api.whatsapp.com/send/?phone=6289505721124');
 })->name('contact');
 
-
 /*
 |--------------------------------------------------------------------------
 | INVOICE
@@ -54,10 +56,8 @@ Route::get('/invoice/{invoice_code}', [InvoiceController::class, 'show'])
 Route::get('/invoice/{invoice_code}/download', [InvoiceController::class, 'download'])
     ->name('invoice.download');
 
-Route::get('/payment/success/update-status/{order}', 
-    [LandingPageController::class, 'markAsPaid'])
+Route::get('/payment/success/update-status/{order}', [LandingPageController::class, 'markAsPaid'])
     ->name('payment.markAsPaid');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -73,35 +73,33 @@ Route::post('/cek-pesanan', [OrderTrackController::class, 'check'])
 Route::get('/cek-pesanan/hasil', [OrderTrackController::class, 'hasil'])
     ->name('cekpesanan.hasil');
 
-Route::get('/preview-content/{id}', 
-    [OrderTrackController::class, 'preview'])
+/*
+|--------------------------------------------------------------------------
+| PREVIEW FILE KONTEN (CLIENT)
+|--------------------------------------------------------------------------
+*/
+Route::get('/preview-content/{id}', [OrderTrackController::class, 'preview'])
     ->name('orders.content.preview');
-
-
 
 /*
 |--------------------------------------------------------------------------
 | DOWNLOAD FILE KONTEN (CLIENT)
 |--------------------------------------------------------------------------
 */
-Route::get('/download-content/{id}', 
-    [OrderContentController::class, 'download'])
+Route::get('/download-content/{id}', [OrderContentController::class, 'download'])
     ->name('orders.content.download');
-
 
 /*
 |--------------------------------------------------------------------------
 | CLIENT TESTIMONIAL
+| (Tetap pakai LandingPageController biar tidak break)
 |--------------------------------------------------------------------------
 */
-Route::get('/testimonial/create/{order}', 
-    [LandingPageController::class, 'createTestimonial'])
+Route::get('/testimonial/create/{order}', [LandingPageController::class, 'createTestimonial'])
     ->name('testimonial.create');
 
-Route::post('/testimonial/store/{order}', 
-    [LandingPageController::class, 'storeTestimonial'])
+Route::post('/testimonial/store/{order}', [LandingPageController::class, 'storeTestimonial'])
     ->name('testimonial.store');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -114,7 +112,6 @@ Route::get('/order/{service}', [LandingPageController::class, 'orderForm'])
 Route::post('/order/{service}', [LandingPageController::class, 'orderSubmit'])
     ->name('order.submit');
 
-
 /*
 |--------------------------------------------------------------------------
 | MIDTRANS CALLBACK
@@ -125,7 +122,6 @@ Route::get('/payment/{order}', [LandingPageController::class, 'paymentPage'])
 
 Route::post('/midtrans/callback', [LandingPageController::class, 'midtransCallback'])
     ->name('midtrans.callback');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -141,9 +137,8 @@ Route::post('/admin/login', [AuthController::class, 'login'])
 Route::post('/admin/logout', [AuthController::class, 'logout'])
     ->name('admin.logout');
 
-
 /*
-|--------------------------------------------------------------------------
+|------------------------------------------------------------------------------------------------------------------------------------------
 | ADMIN PANEL (LOGIN REQUIRED)
 |--------------------------------------------------------------------------
 */
@@ -166,27 +161,24 @@ Route::prefix('admin')
         Route::resource('/orders', OrderController::class);
 
         // Update Progress Order (catatan admin)
-        Route::post('/orders/{order}/update-progress', 
-            [OrderController::class, 'updateProgress'])
+        Route::post('/orders/{order}/update-progress', [OrderController::class, 'updateProgress'])
             ->name('orders.updateProgress');
 
         /*
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         | UPLOAD / DELETE KONTEN (ADMIN)
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         */
-        Route::post('/orders/{order}/content', 
-            [OrderContentController::class, 'store'])
+        Route::post('/orders/{order}/content', [OrderContentController::class, 'store'])
             ->name('orders.content.store');
 
-        Route::delete('/orders/content/{id}', 
-            [OrderContentController::class, 'delete'])
+        Route::delete('/orders/content/{id}', [OrderContentController::class, 'delete'])
             ->name('orders.content.delete');
 
         /*
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         | SETTINGS WEBSITE
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         */
         Route::get('/settings', [SettingController::class, 'index'])
             ->name('settings.index');

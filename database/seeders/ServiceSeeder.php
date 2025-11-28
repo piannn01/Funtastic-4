@@ -3,50 +3,50 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Service;
 
 class ServiceSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('services')->insert([
+        $services = [
             [
-                'name' => 'Desain Grafis',
-                'description' => 'Layanan pembuatan desain profesional seperti logo, banner, brosur, dan kebutuhan visual lainnya.',
-                'price' => 250000,
-                'duration' => '3 Hari',
+                'name' => 'Basic Starter',
+                'feed' => 8,
+                'stories' => 8,
+                'video_reels' => 0,
+                'duration' => 30,
+                'description' => 'Paket pemula untuk social media management. Cocok untuk UMKM atau personal brand baru.',
+                'price' => 800000,
                 'status' => 'active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Mobile Programming',
-                'description' => 'Pengembangan aplikasi mobile berbasis Android dan iOS sesuai kebutuhan bisnis Anda.',
+                'name' => 'Pro Growth',
+                'feed' => 12,
+                'stories' => 12,
+                'video_reels' => 2,
+                'duration' => 30,
+                'description' => 'Paket berkembang untuk meningkatkan engagement dan konsistensi konten.',
                 'price' => 1500000,
-                'duration' => '14 Hari',
                 'status' => 'active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
-                'name' => 'Reparasi Gadget',
-                'description' => 'Layanan perbaikan gadget seperti smartphone dan tablet dengan teknisi berpengalaman.',
-                'price' => 100000,
-                'duration' => '2 Hari',
+                'name' => 'Premium Max',
+                'feed' => 20,
+                'stories' => 25,
+                'video_reels' => 4,
+                'duration' => 30,
+                'description' => 'Paket premium lengkap untuk kebutuhan konten intensif dan brand besar.',
+                'price' => 2800000,
                 'status' => 'active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
-            [
-                'name' => 'Web Development',
-                'description' => 'Pembuatan dan pengembangan website profesional untuk bisnis, toko online, maupun portofolio pribadi.',
-                'price' => 2000000,
-                'duration' => '10 Hari',
-                'status' => 'active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-        ]);
+        ];
+
+        foreach ($services as $data) {
+            Service::updateOrCreate(
+                ['name' => $data['name']],
+                $data
+            );
+        }
     }
 }

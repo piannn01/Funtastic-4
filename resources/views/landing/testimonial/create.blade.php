@@ -16,25 +16,56 @@
         @csrf
 
         <label class="font-semibold">Rating</label>
-        <select name="rating" class="w-full border p-2 rounded mb-4" required>
-            <option value="5">⭐⭐⭐⭐⭐ (Sangat Puas)</option>
-            <option value="4">⭐⭐⭐⭐ (Puas)</option>
-            <option value="3">⭐⭐⭐ (Cukup)</option>
-            <option value="2">⭐⭐ (Kurang)</option>
-            <option value="1">⭐ (Tidak Puas)</option>
+        <select name="rating"
+                class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required>
+            <option value="5" {{ old('rating') == 5 ? 'selected' : '' }}>⭐⭐⭐⭐⭐ (Sangat Puas)</option>
+            <option value="4" {{ old('rating') == 4 ? 'selected' : '' }}>⭐⭐⭐⭐ (Puas)</option>
+            <option value="3" {{ old('rating') == 3 ? 'selected' : '' }}>⭐⭐⭐ (Cukup)</option>
+            <option value="2" {{ old('rating') == 2 ? 'selected' : '' }}>⭐⭐ (Kurang)</option>
+            <option value="1" {{ old('rating') == 1 ? 'selected' : '' }}>⭐ (Tidak Puas)</option>
         </select>
 
         <label class="font-semibold">Testimoni</label>
         <textarea name="message" rows="5"
-            class="w-full border p-2 rounded mb-4"
-            placeholder="Tulis pengalaman kamu...">{{ old('message') }}</textarea>
+                  class="w-full border p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Tulis pengalaman kamu..."
+                  required>{{ old('message') }}</textarea>
 
-        <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+        <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
             Kirim Testimoni
         </button>
 
     </form>
 
 </div>
+
+{{-- SweetAlert --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{-- Notif sukses --}}
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: @json(session('success')),
+        confirmButtonText: 'Oke'
+    });
+</script>
+@endif
+
+{{-- Notif error validasi --}}
+@if($errors->any())
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        html: `{!! implode('<br>', $errors->all()) !!}`,
+        confirmButtonText: 'Oke'
+    });
+</script>
+@endif
 
 @endsection

@@ -2,26 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\Setting;
 use Illuminate\Database\Seeder;
+use App\Models\Setting;
 
 class SettingSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Hapus data lama jika ada, untuk memastikan hanya ada 1 baris
-        Setting::truncate();
-        
-        Setting::create([
-            'site_name' => 'Funtastic 4 - Jasa Pengelola Media Sosial',
-            'logo' => 'logo.png',
-            'description' => 'Kami membantu brand Anda tumbuh melalui strategi pengelolaan media sosial yang efektif dan kreatif.',
-            'email' => 'contact@funtastic4.com',
-            'whatsapp' => '6289505721124',
-            'address' => 'Jl. KH. Hasyim Asy’ari No. 17, Jombang, Jawa Timur',
-        ]);
+        Setting::updateOrCreate(
+            ['id' => 1],
+            [
+                'site_name' => 'Funtastic 4 - Jasa Pengelola Media Sosial',
+                'logo' => 'logo.png',
+                'description' => 'Layanan social media management untuk UMKM, brand, dan personal branding.',
+                'email' => 'support@funtastic4.web.id',
+                'whatsapp' => '6281234567890',
+                'address' => 'Jl. KH. Hasyim Asy’ari No. 17, Jombang, Jawa Timur',
+            ]
+        );
     }
 }
