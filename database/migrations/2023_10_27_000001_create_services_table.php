@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->integer('feed')->default(0);
             $table->integer('stories')->default(0);
             $table->integer('video_reels')->default(0);
-            $table->integer('duration')->default(30);
+            $table->text('duration')->default('30 Hari');
             $table->text('description')->nullable();
             $table->decimal('price', 15, 2)->default(0.00);
             $table->enum('status', ['active', 'inactive'])->default('active');

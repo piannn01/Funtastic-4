@@ -9,19 +9,107 @@ use App\Models\OrderContent;
 use App\Models\OrderProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | LIST ORDER
+    | LIST ORDER + FILTER + SORT + SEARCH + DATE RANGE
     |--------------------------------------------------------------------------
     */
-    public function index()
-    {
-        $orders = Order::with('service')->latest()->get();
-        return view('admin.orders.index', compact('orders'));
+    public function index(Request $request)
+{
+    // ambil parameter dari URL
+    $search        = $request->query('search');
+    $serviceId     = $request->query('service_id');
+    $status        = $request->query('status');
+    $paymentStatus = $request->query('payment_status');
+
+    // single date filter (baru)
+    $date = $request->query('date');
+
+    // fallback kalau masih ada URL lama from/to
+    $from = $request->query('from');
+    $to   = $request->query('to');
+
+    $sortBy  = $request->query('sort_by', 'created_at');
+    $sortDir = $request->query('sort_dir', 'desc');
+
+    // whitelist sort
+    $allowedSortBy = ['created_at', 'name', 'email', 'price', 'status', 'payment_status'];
+    if (!in_array($sortBy, $allowedSortBy)) {
+        $sortBy = 'created_at';
     }
+
+    $allowedSortDir = ['asc', 'desc'];
+    if (!in_array($sortDir, $allowedSortDir)) {
+        $sortDir = 'desc';
+    }
+
+    $ordersQuery = Order::with('service');
+
+    // SEARCH
+    if ($search) {
+        $ordersQuery->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('instagram_username', 'like', "%{$search}%")
+              ->orWhere('instagram', 'like', "%{$search}%");
+        });
+    }
+
+    // FILTER by service
+    if ($serviceId) {
+        $ordersQuery->where('service_id', $serviceId);
+    }
+
+    // FILTER by status
+    if ($status) {
+        $ordersQuery->where('status', $status);
+    }
+
+    // FILTER by payment status
+    if ($paymentStatus) {
+        $ordersQuery->where('payment_status', $paymentStatus);
+    }
+
+    // ✅ FILTER SINGLE DATE (priority)
+    if ($date) {
+        $ordersQuery->whereDate('created_at', Carbon::parse($date)->toDateString());
+    }
+    // ✅ fallback filter range kalau URL lama masih dipakai
+    elseif ($from && $to) {
+        $ordersQuery->whereBetween('created_at', [
+            Carbon::parse($from)->startOfDay(),
+            Carbon::parse($to)->endOfDay(),
+        ]);
+        // biar view baru tetap kebaca tanggalnya
+        $date = $from; 
+    }
+
+    // SORTING
+    $ordersQuery->orderBy($sortBy, $sortDir);
+
+    // pagination
+    $orders = $ordersQuery->paginate(10)->appends($request->query());
+
+    // dropdown services
+    $services = Service::orderBy('name')->get();
+
+    return view('admin.orders.index', compact(
+        'orders',
+        'services',
+        'search',
+        'serviceId',
+        'status',
+        'paymentStatus',
+        'sortBy',
+        'sortDir',
+        'date' 
+    ));
+}
+
 
     /*
     |--------------------------------------------------------------------------
@@ -30,22 +118,19 @@ class OrderController extends Controller
     */
     public function show(Order $order)
     {
-    $order->load('service', 'contents', 'progressItems');
+        $order->load('service', 'contents', 'progressItems');
 
-    // Timeline jadwal pengiriman konten
-    $timeline = $order->progressItems()
-        ->orderBy('scheduled_date')
-        ->orderBy('content_index')
-        ->get();
+        // Timeline jadwal pengiriman konten
+        $timeline = $order->progressItems()
+            ->orderBy('scheduled_date')
+            ->orderBy('content_index')
+            ->get();
 
-    // Kirim ke view
-    return view('admin.orders.show', [
-        'order'    => $order,
-        'timeline' => $timeline
-    ]);
+        return view('admin.orders.show', [
+            'order'    => $order,
+            'timeline' => $timeline
+        ]);
     }
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -65,9 +150,13 @@ class OrderController extends Controller
     */
     public function update(Request $request, Order $order)
     {
-        $request->validate(['status' => 'required|string']);
+        $request->validate([
+            'status' => 'required|string'
+        ]);
 
-        $order->update(['status' => $request->status]);
+        $order->update([
+            'status' => $request->status
+        ]);
 
         return redirect()->route('admin.orders.index')
             ->with('success', 'Status pesanan berhasil diperbarui.');
@@ -93,7 +182,9 @@ class OrderController extends Controller
     */
     public function updateProgress(Request $request, $orderId)
     {
-        $request->validate(['progress_note' => 'nullable|string']);
+        $request->validate([
+            'progress_note' => 'nullable|string'
+        ]);
 
         $order = Order::findOrFail($orderId);
         $order->progress_note = $request->progress_note;
@@ -108,6 +199,9 @@ class OrderController extends Controller
     |--------------------------------------------------------------------------
     | UPLOAD KONTEN (ADMIN → KLIEN)
     |--------------------------------------------------------------------------
+    | NOTE:
+    | Route baru kamu pakai OrderContentController@store.
+    | Tapi method ini tetap aku keep biar tidak break kalau masih dipakai.
     */
     public function uploadContent(Request $request, $orderId)
     {
@@ -130,11 +224,7 @@ class OrderController extends Controller
             'caption'      => $request->caption,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE TIMELINE → SET STATUS SELESAI UNTUK ENTRY PERTAMA YANG BELUM SELESAI
-        |--------------------------------------------------------------------------
-        */
+        // UPDATE TIMELINE → tandai entry pertama yang belum selesai
         $next = OrderProgress::where('order_id', $orderId)
             ->where('content_type', $request->content_type)
             ->where('status', 'Belum')
@@ -147,10 +237,22 @@ class OrderController extends Controller
             $next->save();
         }
 
-        // HITUNG ULANG PROGRESS (%)
+        // HITUNG ULANG PROGRESS
         $order->refreshProgress();
 
         return back()->with('success', 'Konten berhasil diupload & progress otomatis diperbarui.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ALIAS untuk kompatibilitas route baru
+    |--------------------------------------------------------------------------
+    | Jika suatu tempat masih manggil store/delete lewat controller ini,
+    | method ini bakal forward ke uploadContent/deleteContent.
+    */
+    public function store(Request $request, $orderId)
+    {
+        return $this->uploadContent($request, $orderId);
     }
 
     /*
@@ -173,5 +275,11 @@ class OrderController extends Controller
         $order->refreshProgress();
 
         return back()->with('success', 'Konten berhasil dihapus.');
+    }
+
+    // alias kompatibilitas untuk route delete baru
+    public function delete($id)
+    {
+        return $this->deleteContent($id);
     }
 }

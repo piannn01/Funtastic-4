@@ -23,6 +23,8 @@ use App\Http\Controllers\Admin\TestimonialsController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OrderContentController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\FinanceReportController; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,12 +33,14 @@ use App\Http\Controllers\Admin\SettingController;
 */
 Route::redirect('/admin', '/admin/dashboard');
 
+
 /*
 |--------------------------------------------------------------------------
-| LANDING PAGE
+| LANDING PAGE (CLIENT)
 |--------------------------------------------------------------------------
 */
 Route::get('/', [LandingPageController::class, 'index'])->name('index');
+
 Route::get('/services', [LandingPageController::class, 'services'])->name('services');
 Route::get('/testimonials', [LandingPageController::class, 'testimonials'])->name('testimonials');
 Route::get('/about', [LandingPageController::class, 'about'])->name('about');
@@ -45,9 +49,10 @@ Route::get('/contact', function () {
     return redirect()->away('https://api.whatsapp.com/send/?phone=6289505721124');
 })->name('contact');
 
+
 /*
 |--------------------------------------------------------------------------
-| INVOICE
+| INVOICE (CLIENT)
 |--------------------------------------------------------------------------
 */
 Route::get('/invoice/{invoice_code}', [InvoiceController::class, 'show'])
@@ -56,8 +61,15 @@ Route::get('/invoice/{invoice_code}', [InvoiceController::class, 'show'])
 Route::get('/invoice/{invoice_code}/download', [InvoiceController::class, 'download'])
     ->name('invoice.download');
 
+/*
+|--------------------------------------------------------------------------
+| PAYMENT SUCCESS (CLIENT)
+|--------------------------------------------------------------------------
+| callback sukses dari payment gateway
+*/
 Route::get('/payment/success/update-status/{order}', [LandingPageController::class, 'markAsPaid'])
     ->name('payment.markAsPaid');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +85,7 @@ Route::post('/cek-pesanan', [OrderTrackController::class, 'check'])
 Route::get('/cek-pesanan/hasil', [OrderTrackController::class, 'hasil'])
     ->name('cekpesanan.hasil');
 
+
 /*
 |--------------------------------------------------------------------------
 | PREVIEW FILE KONTEN (CLIENT)
@@ -80,6 +93,7 @@ Route::get('/cek-pesanan/hasil', [OrderTrackController::class, 'hasil'])
 */
 Route::get('/preview-content/{id}', [OrderTrackController::class, 'preview'])
     ->name('orders.content.preview');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -89,10 +103,11 @@ Route::get('/preview-content/{id}', [OrderTrackController::class, 'preview'])
 Route::get('/download-content/{id}', [OrderContentController::class, 'download'])
     ->name('orders.content.download');
 
+
 /*
 |--------------------------------------------------------------------------
 | CLIENT TESTIMONIAL
-| (Tetap pakai LandingPageController biar tidak break)
+| (Masih di LandingPageController biar tidak break)
 |--------------------------------------------------------------------------
 */
 Route::get('/testimonial/create/{order}', [LandingPageController::class, 'createTestimonial'])
@@ -100,6 +115,7 @@ Route::get('/testimonial/create/{order}', [LandingPageController::class, 'create
 
 Route::post('/testimonial/store/{order}', [LandingPageController::class, 'storeTestimonial'])
     ->name('testimonial.store');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -112,9 +128,10 @@ Route::get('/order/{service}', [LandingPageController::class, 'orderForm'])
 Route::post('/order/{service}', [LandingPageController::class, 'orderSubmit'])
     ->name('order.submit');
 
+
 /*
 |--------------------------------------------------------------------------
-| MIDTRANS CALLBACK
+| MIDTRANS / PAYMENT FLOW (CLIENT)
 |--------------------------------------------------------------------------
 */
 Route::get('/payment/{order}', [LandingPageController::class, 'paymentPage'])
@@ -122,6 +139,8 @@ Route::get('/payment/{order}', [LandingPageController::class, 'paymentPage'])
 
 Route::post('/midtrans/callback', [LandingPageController::class, 'midtransCallback'])
     ->name('midtrans.callback');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -137,8 +156,9 @@ Route::post('/admin/login', [AuthController::class, 'login'])
 Route::post('/admin/logout', [AuthController::class, 'logout'])
     ->name('admin.logout');
 
+
 /*
-|------------------------------------------------------------------------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | ADMIN PANEL (LOGIN REQUIRED)
 |--------------------------------------------------------------------------
 */
@@ -147,17 +167,33 @@ Route::prefix('admin')
     ->middleware(['admin.auth'])
     ->group(function () {
 
-        // Dashboard
+        /*
+        |----------------------------------------------------------------------
+        | Dashboard
+        |----------------------------------------------------------------------
+        */
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
-        // CRUD Services
+        /*
+        |----------------------------------------------------------------------
+        | CRUD Services
+        |----------------------------------------------------------------------
+        */
         Route::resource('/services', ServicesController::class);
 
-        // CRUD Testimonials
+        /*
+        |----------------------------------------------------------------------
+        | CRUD Testimonials
+        |----------------------------------------------------------------------
+        */
         Route::resource('/testimonials', TestimonialsController::class);
 
-        // CRUD Orders
+        /*
+        |----------------------------------------------------------------------
+        | CRUD Orders
+        |----------------------------------------------------------------------
+        */
         Route::resource('/orders', OrderController::class);
 
         // Update Progress Order (catatan admin)
@@ -174,6 +210,16 @@ Route::prefix('admin')
 
         Route::delete('/orders/content/{id}', [OrderContentController::class, 'delete'])
             ->name('orders.content.delete');
+
+
+        /*
+        |----------------------------------------------------------------------
+        | LAPORAN KEUANGAN (ADMIN) ✅
+        |----------------------------------------------------------------------
+        */
+        Route::get('/reports/finance', [FinanceReportController::class, 'index'])
+            ->name('reports.finance');
+
 
         /*
         |----------------------------------------------------------------------

@@ -39,13 +39,18 @@ return [
         ],
 
         'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
-        ],
+        'driver' => 'local',
+
+        // arahkan ke folder storage di public_html
+        'root' => env('PUBLIC_DISK_ROOT', base_path('../public_html/storage')),
+
+        // URL asset publiknya
+        'url' => env('APP_URL') . '/storage',
+
+        'visibility' => 'public',
+        'throw' => false,
+    ],
+
 
         's3' => [
             'driver' => 's3',

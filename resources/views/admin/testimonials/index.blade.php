@@ -20,7 +20,6 @@
                     <th class="p-4 text-left font-semibold">Nama</th>
                     <th class="p-4 text-left font-semibold">Rating</th>
                     <th class="p-4 text-left font-semibold">Status</th>
-                    <th class="p-4 text-left font-semibold">Aksi</th>
                 </tr>
             </thead>
 
@@ -52,28 +51,7 @@
                             @endif
                         </td>
 
-                        {{-- Aksi --}}
-                        <td class="p-4 flex items-center space-x-3">
-
-                            {{-- Edit --}}
-                            <a href="{{ route('admin.testimonials.edit', $testimonial->id) }}"
-                               class="text-blue-600 hover:underline">
-                                Edit
-                            </a>
-
-                            {{-- Hapus --}}
-                            <form action="{{ route('admin.testimonials.destroy', $testimonial->id) }}"
-                                  method="POST"
-                                  onsubmit="return confirm('Yakin ingin menghapus testimoni ini?')">
-                                @csrf
-                                @method('DELETE')
-
-                                <button class="text-red-600 hover:underline">
-                                    Hapus
-                                </button>
-                            </form>
-
-                        </td>
+                        
 
                     </tr>
                 @endforeach

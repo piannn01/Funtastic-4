@@ -3,30 +3,30 @@ import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-    // PENTING: bikin semua asset ditulis dengan path root domain
-    // jadi URL-nya: /build/assets/xxx.css bukan /Funtastic-4/public/...
-    base: '/',
+  /**
+   * Pakai base relatif supaya asset tetap ketemu
+   * baik di root domain maupun kalau public_html pakai symlink/copy.
+   * Hasil URL jadi: build/assets/xxx.js
+   */
+  base: './',
 
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true,
+  plugins: [
+    laravel({
+      input: [
+        'resources/css/app.css',
+        'resources/js/app.js'
+      ],
+      refresh: true,
 
-            // biar outputnya konsisten ke public/build
-            buildDirectory: 'build',
-            publicDirectory: 'public',
-        }),
-        tailwindcss(),
-    ],
+      // default laravel outputnya ke public/build
+      buildDirectory: 'build',
+    }),
+    tailwindcss(),
+  ],
 
-    build: {
-        // pastiin manifest selalu dibuat
-        manifest: true,
-
-        // pastiin outputnya masuk public/build
-        outDir: 'public/build',
-
-        // jangan hapus folder build lain duluan kalau ada proses copy/symlink
-        emptyOutDir: true,
-    },
+  build: {
+    manifest: true,
+    outDir: 'public/build',
+    emptyOutDir: true,
+  },
 });

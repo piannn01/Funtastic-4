@@ -21,10 +21,14 @@
                 <a href="{{ route('admin.services.index') }}" class="hover:underline">Layanan</a>
                 <a href="{{ route('admin.orders.index') }}" class="hover:underline">Pesanan</a>
                 <a href="{{ route('admin.testimonials.index') }}" class="hover:underline">Testimoni</a>
+                <a href="{{ route('admin.reports.finance') }}"
+                class="{{ request()->routeIs('admin.reports.finance') ? 'text-blue-600 font-semibold' : '' }}">
+                Laporan Keuangan
+                </a>
 
                 <form action="{{ route('admin.logout') }}" method="POST" class="inline">
                     @csrf
-                    <button class="text-red-300 hover:text-white">Logout</button>
+                    <button class="text-red-500 hover:underline">Logout</button>
                 </form>
             </div>
         </div>
