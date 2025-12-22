@@ -111,19 +111,29 @@
                     <tbody>
                         @foreach($unfinishedPaidOrders as $order)
                             @php
-                                $progress = $order->progress_percent ?? 0;
+                                // ✅ FIX: gunakan field progress asli dari tabel orders
+                                $progress = (int) ($order->progress ?? 0);
+
+                                // jaga-jaga biar tidak aneh
+                                if ($progress < 0) $progress = 0;
+                                if ($progress > 100) $progress = 100;
+
                                 $status = $order->status ?? '-';
                             @endphp
                             <tr class="border-b">
                                 <td class="py-3 pr-3 font-semibold">
-                                {{ $order->kode_unik ?? '-' }}</td>
+                                    {{ $order->kode_unik ?? '-' }}
+                                </td>
+
                                 <td class="py-3 pr-3">
                                     <div class="font-medium">{{ $order->name }}</div>
                                     <div class="text-xs text-gray-500">{{ $order->email }}</div>
                                 </td>
+
                                 <td class="py-3 pr-3">
                                     {{ optional($order->service)->name ?? '-' }}
                                 </td>
+
                                 <td class="py-3 pr-3">
                                     <div class="w-44 bg-gray-200 rounded-full h-2 overflow-hidden">
                                         <div class="bg-blue-600 h-2" style="width: {{ $progress }}%"></div>
@@ -136,6 +146,7 @@
                                         </div>
                                     @endif
                                 </td>
+
                                 <td class="py-3 pr-3">
                                     @if($status === 'processing')
                                         <span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 font-semibold">
@@ -155,6 +166,7 @@
                                         </span>
                                     @endif
                                 </td>
+
                                 <td class="py-3 pr-3">
                                     <a href="{{ route('admin.orders.show', $order->id) }}"
                                        class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg">
