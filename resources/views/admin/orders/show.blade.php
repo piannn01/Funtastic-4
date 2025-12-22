@@ -62,8 +62,8 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.orders.content.store', $order->id) }}" 
-              method="POST" 
+        <form action="{{ route('admin.orders.content.store', $order->id) }}"
+              method="POST"
               enctype="multipart/form-data">
             @csrf
 
@@ -83,9 +83,9 @@
                 {{-- File --}}
                 <div>
                     <label class="font-semibold">File Konten</label>
-                    <input type="file" 
-                           name="file_path" 
-                           class="w-full border rounded px-3 py-2 mt-1" 
+                    <input type="file"
+                           name="file_path"
+                           class="w-full border rounded px-3 py-2 mt-1"
                            accept="image/*,video/*"
                            required>
                 </div>
@@ -94,11 +94,11 @@
             {{-- Caption --}}
             <div class="mt-4">
                 <label class="font-semibold">Caption (Opsional)</label>
-                <textarea name="caption" rows="3" 
+                <textarea name="caption" rows="3"
                           class="w-full border rounded px-3 py-2 mt-1"></textarea>
             </div>
 
-            <button type="submit" 
+            <button type="submit"
                     class="mt-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded">
                 Upload Konten
             </button>
@@ -162,6 +162,10 @@
                         $done  = $row->where('status', 'Selesai')->count();
                         $total = $row->count();
 
+                        // ✅ tampilkan tombol WA hanya jika ada minimal 1 konten yang Selesai
+                        $hasCompletedContent = $done > 0;
+
+                        // WA config (tetap ada, tapi dipakai hanya saat tombol tampil)
                         $waNumber = preg_replace('/[^0-9]/', '', $order->phone);
                         $cekLink  = url('/cek-pesanan/hasil?kode_unik='.$order->kode_unik);
 
@@ -196,11 +200,15 @@
                         </td>
 
                         <td class="p-3">
-                            <a href="https://wa.me/{{ $waNumber }}?text={{ $waMessage }}"
-                               target="_blank"
-                               class="bg-green-600 text-white px-3 py-1 rounded text-sm">
-                                Send WA
-                            </a>
+                            @if($hasCompletedContent)
+                                <a href="https://wa.me/{{ $waNumber }}?text={{ $waMessage }}"
+                                   target="_blank"
+                                   class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                    Send WA
+                                </a>
+                            @else
+                                <span class="text-gray-400 text-sm">-</span>
+                            @endif
                         </td>
 
                     </tr>
@@ -213,8 +221,6 @@
 
         @endif
     </div>
-
-
 
 </div>
 
