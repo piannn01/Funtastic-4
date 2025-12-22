@@ -23,7 +23,8 @@ use App\Http\Controllers\Admin\TestimonialsController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OrderContentController;
 use App\Http\Controllers\Admin\SettingController;
-use App\Http\Controllers\Admin\FinanceReportController; 
+use App\Http\Controllers\Admin\FinanceReportController;
+use App\Http\Controllers\Admin\SystemReportController; // ✅ TAMBAHAN: Laporan Keseluruhan
 
 
 /*
@@ -168,31 +169,31 @@ Route::prefix('admin')
     ->group(function () {
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Dashboard
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | CRUD Services
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::resource('/services', ServicesController::class);
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | CRUD Testimonials
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::resource('/testimonials', TestimonialsController::class);
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | CRUD Orders
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::resource('/orders', OrderController::class);
 
@@ -201,9 +202,9 @@ Route::prefix('admin')
             ->name('orders.updateProgress');
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | UPLOAD / DELETE KONTEN (ADMIN)
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::post('/orders/{order}/content', [OrderContentController::class, 'store'])
             ->name('orders.content.store');
@@ -213,18 +214,29 @@ Route::prefix('admin')
 
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | LAPORAN KEUANGAN (ADMIN) ✅
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::get('/reports/finance', [FinanceReportController::class, 'index'])
             ->name('reports.finance');
 
+        /*
+        |--------------------------------------------------------------------------
+        | LAPORAN KESELURUHAN (ADMIN) ✅✅ (TAMBAHAN OUTPUT OWNER)
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/reports/summary', [SystemReportController::class, 'index'])
+            ->name('reports.summary');
+
+        Route::get('/reports/summary/download', [SystemReportController::class, 'download'])
+            ->name('reports.summary.download');
+
 
         /*
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | SETTINGS WEBSITE
-        |----------------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
         Route::get('/settings', [SettingController::class, 'index'])
             ->name('settings.index');

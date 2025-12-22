@@ -5,108 +5,209 @@
     <title>Invoice {{ $order->invoice_code }}</title>
 
     <style>
-        body {
+        body{
             font-family: DejaVu Sans, sans-serif;
             margin: 20px;
             font-size: 13px;
             color: #333;
         }
 
-        .container {
+        .container{
             width: 100%;
             border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 18px;
+            border-radius: 10px;
         }
 
-        h2 {
-            text-align: center;
-            font-size: 22px;
-            margin-bottom: 15px;
+        /* ===== HEADER/KOP ===== */
+        .header{
+            width: 100%;
+            margin-bottom: 12px;
         }
 
-        .section-title {
+        .header-table{
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-left{
+            width: 45%;
+            vertical-align: middle;
+        }
+
+        .header-right{
+            width: 55%;
+            vertical-align: middle;
+            text-align: right;
+        }
+
+        .logo{
+            height: 55px;           /* kunci biar gak gede */
+            width: auto;
+            display: inline-block;
+        }
+
+        .company{
+            margin: 0;
+            font-size: 16px;
             font-weight: bold;
-            margin-top: 18px;
-            margin-bottom: 8px;
-            font-size: 15px;
-            border-bottom: 1px solid #ddd;
+            letter-spacing: 0.5px;
+        }
+
+        .tagline{
+            margin: 2px 0 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .line{
+            border-top: 1px solid #ddd;
+            margin: 10px 0 14px 0;
+        }
+
+        h2{
+            text-align: center;
+            font-size: 20px;
+            margin: 0 0 12px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== STATUS ===== */
+        .status{
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 9px 0;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            color: #fff;
+        }
+        .paid{ background: #4CAF50; }
+        .pending{ background: #FFC107; color:#000; }
+        .failed{ background: #F44336; }
+
+        /* ===== SECTION ===== */
+        .section-title{
+            font-weight: bold;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
             padding-bottom: 4px;
         }
 
-        .status {
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            padding: 8px 0;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            color: white;
-        }
-
-        .paid { background: #4CAF50; }
-        .pending { background: #FFC107; color: #000; }
-        .failed { background: #F44336; }
-
-        table {
+        table{
             width: 100%;
+            border-collapse: collapse;
             margin-top: 6px;
         }
 
-        td {
-            padding: 4px 0;
+        td{
+            padding: 5px 0;
+            vertical-align: top;
         }
 
-        .footer-note {
-            margin-top: 15px;
+        td:first-child{
+            width: 32%;
+            color: #111;
+        }
+
+        /* biar nilai terlihat rapi */
+        .value{
+            text-align: right;
+            font-weight: normal;
+            color: #333;
+        }
+
+        .footer-note{
+            margin-top: 14px;
             padding: 10px;
-            background: #f5f5f5;
+            background: #f7f7f7;
             border-left: 3px solid #1976d2;
             border-radius: 4px;
             font-size: 12px;
+            line-height: 1.4;
         }
     </style>
 </head>
 
 <body>
-
 <div class="container">
+
+    {{-- ===== KOP PERUSAHAAN (RAPI) ===== --}}
+    <div class="header">
+        <table class="header-table">
+            <tr>
+                <td class="header-left">
+                    <img class="logo" src="{{ public_path('assets/Funtastic4.png') }}" alt="Funtastic 4">
+                </td>
+                <td class="header-right">
+                    <p class="company">FUNTASTIC 4</p>
+                    <p class="tagline">Jasa Pengelola Konten Media Sosial</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="line"></div>
 
     <h2>INVOICE PEMBAYARAN</h2>
 
     {{-- STATUS --}}
     @php
-        $status = strtolower($order->payment_status);
+        $status = strtolower($order->payment_status ?? 'pending');
+        $statusClass = $status === 'paid' ? 'paid' : ($status === 'pending' ? 'pending' : 'failed');
     @endphp
 
-    <div class="status 
-        {{ $status === 'paid' ? 'paid' : ($status === 'pending' ? 'pending' : 'failed') }}">
-        {{ strtoupper($order->payment_status) }}
+    <div class="status {{ $statusClass }}">
+        {{ strtoupper($order->payment_status ?? 'PENDING') }}
     </div>
 
     <div class="section-title">Informasi Utama</div>
-
     <table>
-        <tr><td><strong>Kode Unik:</strong></td><td>{{ $order->kode_unik }}</td></tr>
-        <tr><td><strong>Kode Invoice:</strong></td><td>{{ $order->invoice_code }}</td></tr>
-        <tr><td><strong>Tanggal:</strong></td><td>{{ $order->created_at->format('d/m/Y H:i') }}</td></tr>
+        <tr>
+            <td><strong>Kode Unik</strong></td>
+            <td class="value">{{ $order->kode_unik }}</td>
+        </tr>
+        <tr>
+            <td><strong>Kode Invoice</strong></td>
+            <td class="value">{{ $order->invoice_code }}</td>
+        </tr>
+        <tr>
+            <td><strong>Tanggal</strong></td>
+            <td class="value">{{ optional($order->created_at)->format('d/m/Y H:i') }}</td>
+        </tr>
     </table>
 
     <div class="section-title">Data Pemesan</div>
-
     <table>
-        <tr><td><strong>Nama:</strong></td><td>{{ $order->name }}</td></tr>
-        <tr><td><strong>Email:</strong></td><td>{{ $order->email }}</td></tr>
-        <tr><td><strong>No. WA:</strong></td><td>{{ $order->phone }}</td></tr>
-        <tr><td><strong>Instagram:</strong></td><td>{{ $order->instagram ?? '-' }}</td></tr>
+        <tr>
+            <td><strong>Nama</strong></td>
+            <td class="value">{{ $order->name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Email</strong></td>
+            <td class="value">{{ $order->email }}</td>
+        </tr>
+        <tr>
+            <td><strong>No. WA</strong></td>
+            <td class="value">{{ $order->phone }}</td>
+        </tr>
+        <tr>
+            <td><strong>Instagram</strong></td>
+            <td class="value">{{ $order->instagram ?? '-' }}</td>
+        </tr>
     </table>
 
     <div class="section-title">Detail Layanan</div>
-
     <table>
-        <tr><td><strong>Paket:</strong></td><td>{{ $order->service->name }}</td></tr>
-        <tr><td><strong>Harga:</strong></td>
-            <td>Rp {{ number_format($order->price, 0, ',', '.') }}</td>
+        <tr>
+            <td><strong>Paket</strong></td>
+            <td class="value">{{ optional($order->service)->name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Harga</strong></td>
+            <td class="value">Rp {{ number_format($order->price, 0, ',', '.') }}</td>
         </tr>
     </table>
 
@@ -116,6 +217,5 @@
     </div>
 
 </div>
-
 </body>
 </html>

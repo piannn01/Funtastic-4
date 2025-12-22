@@ -184,7 +184,6 @@ class LandingPageController extends Controller
 
 
 
-
     /* ==========================================
      | CEK PESANAN
      ========================================== */
